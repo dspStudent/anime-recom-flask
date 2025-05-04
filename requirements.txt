@@ -1,0 +1,14 @@
+Flask
+pymongo
+pydantic
+pydantic[email]
+pandas
+seaborn
+matplotlib
+langchain
+langchain-qdrant
+transformers
+sentence-transformers
+bitsandbytes
+accelerate
+langchain-huggingface
