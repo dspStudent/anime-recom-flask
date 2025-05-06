@@ -1,0 +1,128 @@
+openapi: 3.0.0
+info:
+  title: Capstone Anime API
+  description: API for anime search, login, and interaction
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/capstone/v1/api
+paths:
+  /login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /anime:
+    get:
+      summary: Retrieve anime list
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A list of animes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total_items:
+                        type: integer
+                      has_next:
+                        type: boolean
+                  animes:
+                    type: object
+                    properties:
+                      tv:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Anime'
+                      movies:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Anime'
+  /like:
+    post:
+      summary: Like or click an anime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                animeId:
+                  type: string
+                type:
+                  type: string
+              required:
+                - userId
+                - animeId
+                - type
+      responses:
+        '200':
+          description: Action recorded
+components:
+  schemas:
+    Anime:
+      type: object
+      properties:
+        animeName:
+          type: string
+        animeId:
+          type: string
+        imgUrl:
+          type: string
+        synopsis:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string

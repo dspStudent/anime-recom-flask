@@ -12,3 +12,4 @@ sentence-transformers
 bitsandbytes
 accelerate
 langchain-huggingface
+ipykernel

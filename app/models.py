@@ -15,3 +15,4 @@ class LikeModel(BaseModel):
 class ClickModel(BaseModel):
     userId: int
     animeId: int
+    clickCount: int = Field(default=1)

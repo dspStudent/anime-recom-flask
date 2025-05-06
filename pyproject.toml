@@ -5,7 +5,19 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "accelerate>=1.6.0",
+    "bitsandbytes>=0.45.5",
+    "flasgger>=0.9.7.1",
     "flask>=3.1.0",
+    "ipykernel>=6.29.5",
+    "langchain>=0.3.25",
+    "langchain-huggingface>=0.1.2",
+    "langchain-qdrant>=0.2.0",
+    "matplotlib>=3.10.1",
+    "pandas>=2.2.3",
     "pydantic[email]>=2.11.4",
     "pymongo>=4.12.1",
+    "seaborn>=0.13.2",
+    "sentence-transformers>=4.1.0",
+    "transformers>=4.51.3",
 ]
