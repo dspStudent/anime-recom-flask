@@ -13,3 +13,4 @@ bitsandbytes
 accelerate
 langchain-huggingface
 ipykernel
+flasgger
