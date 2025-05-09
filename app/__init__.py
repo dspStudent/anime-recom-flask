@@ -7,6 +7,15 @@ from qdrant_client.http.models import Distance, VectorParams, KeywordIndexParams
 from langchain_qdrant import QdrantVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
 from flasgger import Swagger
+import os
+from dotenv import load_dotenv
+from flask_cors import CORS
+
+
+
+
+# Retrieve values from environment variables
+
 
 # ── LOGGER SETUP ─────────────────────────────────────────────
 logging.basicConfig(
@@ -15,16 +24,26 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+load_dotenv()
+logger.info("Loading environment variables...")
+
+qdrant_url = os.getenv("QADRANT_URL")
+qdrant_api_key = os.getenv("QADRANT_API_KEY")
+embedding_model = os.getenv("EMBEDDING_MODEL")
+collection_name = os.getenv("COLLECTION_NAME")
+mongodb_uri = os.getenv("MONGODB_URI")
+
 # ── QDRANT & VECTOR STORE (package‐level) ────────────────────
 logger.info("Initializing Qdrant client...")
 qdrant_client = QdrantClient(
-    url="https://00417665-6cbf-46cc-b17a-2e5771f88ac7.us-east4-0.gcp.cloud.qdrant.io",
-    api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.6MlJFRgeyQdVZYZlgmDUCURBT6ahRHjkZyFGsdicNmE"
+    url=qdrant_url,
+    api_key=qdrant_api_key,
 )
 
 logger.info("Creating payload index for Qdrant...")
 qdrant_client.create_payload_index(
-    collection_name="anime_ver1",
+    collection_name=collection_name,
     field_name="metadata.anime_type",
     field_schema=KeywordIndexParams(
         type=models.KeywordIndexType.KEYWORD,
@@ -35,7 +54,7 @@ qdrant_client.create_payload_index(
 
 logger.info("Initializing HuggingFace embeddings...")
 _embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_name=embedding_model,
 )
 
 logger.info("Building Qdrant vector store...")
@@ -46,23 +65,26 @@ vector_store = QdrantVectorStore(
 )
 
 logger.info("Connecting to MongoDB...")
-mongo_client = MongoClient("mongodb+srv://dev:dev@cluster0.hwutjuq.mongodb.net/?retryWrites=true&w=majority")
+mongo_client = MongoClient(mongodb_uri)
 
 # ── FLASK FACTORY ────────────────────────────────────────────
 def create_app():
     logger.info("Creating Flask app...")
     app = Flask(__name__)
 
+    # Enable CORS for all routes and origins
+    CORS(app)
     # ── SWAGGER SETUP ─────────────────────────────────────────
     # This will serve Swagger UI at /apidocs
     app.config['SWAGGER'] = {
         'title': 'Capstone Anime API',
         'uiversion': 3
     }
+    
     Swagger(app, template_file='swagger.yaml')
     # Mongo setup
     logger.info("Setting up MongoDB configuration...")
-    mongo_client = MongoClient("mongodb+srv://dev:dev@cluster0.hwutjuq.mongodb.net/?retryWrites=true&w=majority")
+    mongo_client = MongoClient(mongodb_uri)
     app.config["MONGO_DB"] = mongo_client["capstone"]
 
     # also expose vector_store if you ever want direct access

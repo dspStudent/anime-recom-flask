@@ -39,5 +39,4 @@ def like():
 
 @bp.route('/', methods=['GET'])
 def hello():
-    a=1
     return {"message": "Hello from MongoDB"}, 200

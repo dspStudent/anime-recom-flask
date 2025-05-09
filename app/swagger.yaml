@@ -1,128 +1,190 @@
-openapi: 3.0.0
+swagger: "2.0"
 info:
   title: Capstone Anime API
-  description: API for anime search, login, and interaction
-  version: 1.0.0
-servers:
-  - url: http://localhost:5000/capstone/v1/api
+  description: API documentation for the Capstone Anime Recommendation System.
+  version: "1.0.0"
+
+basePath: "/capstone/v1/api"
+schemes:
+  - http
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
 paths:
   /login:
     post:
       summary: User login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-              required:
-                - username
-                - password
+      description: Authenticates a user and returns a token.
+      parameters:
+        - in: body
+          name: credentials
+          required: true
+          schema:
+            type: object
+            required:
+              - type
+              - email
+              - name
+              - password
+            properties:
+              username:
+                type: string
+                example: "user123"
+              password:
+                type: string
+                example: "securepassword"
+              type:
+                type: string
+                example: "login"
+              name:
+                type: string
+                example: "devi"
       responses:
-        '200':
+        200:
           description: Successful login
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        401:
+          description: Unauthorized - Invalid credentials
+
   /anime:
     get:
       summary: Retrieve anime list
+      description: Returns a paginated list of animes. Requires authentication.
       parameters:
-        - name: Authorization
-          in: header
+        - in: header
+          name: Authorization
+          type: string
           required: true
-          schema:
-            type: string
-        - name: search
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: per_page
-          in: query
-          schema:
-            type: integer
-            default: 10
+          description: Bearer token for authentication
+        - in: query
+          name: page
+          type: integer
+          required: false
+          default: 1
+          description: Page number for pagination
+        - in: query
+          name: per_page
+          type: integer
+          required: false
+          default: 10
+          description: Number of items per page
+        - in: query
+          name: search
+          type: string
+          required: false
+          description: Search term to filter animes
       responses:
-        '200':
-          description: A list of animes
-          content:
-            application/json:
-              schema:
+        200:
+          description: A list of animes with pagination metadata
+          schema:
+            type: object
+            properties:
+              meta:
                 type: object
                 properties:
-                  meta:
-                    type: object
-                    properties:
-                      page:
-                        type: integer
-                      per_page:
-                        type: integer
-                      total_items:
-                        type: integer
-                      has_next:
-                        type: boolean
-                  animes:
-                    type: object
-                    properties:
-                      tv:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Anime'
-                      movies:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Anime'
+                  page:
+                    type: integer
+                    example: 1
+                  per_page:
+                    type: integer
+                    example: 10
+                  total_pages:
+                    type: integer
+                    example: 5
+                  total_items:
+                    type: integer
+                    example: 50
+              animes:
+                type: array
+                items:
+                  $ref: "#/definitions/Anime"
+        401:
+          description: Unauthorized - Missing or invalid token
+
   /like:
     post:
       summary: Like or click an anime
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userId:
-                  type: string
-                animeId:
-                  type: string
-                type:
-                  type: string
-              required:
-                - userId
-                - animeId
-                - type
+      description: Records a like or click action for a specific anime by a user. Requires authentication.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+        - in: body
+          name: action
+          required: true
+          schema:
+            type: object
+            required:
+              - userId
+              - animeId
+              - type
+            properties:
+              userId:
+                type: string
+                example: "user123"
+              animeId:
+                type: string
+                example: "anime456"
+              type:
+                type: string
+                enum: [like, click]
+                example: "like"
       responses:
-        '200':
-          description: Action recorded
-components:
-  schemas:
-    Anime:
-      type: object
-      properties:
-        animeName:
+        200:
+          description: Action recorded successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Action recorded successfully."
+        401:
+          description: Unauthorized - Missing or invalid token
+        400:
+          description: Bad Request - Invalid input data
+
+  /:
+    get:
+      summary: Health check
+      description: Returns a simple message to confirm the API is running.
+      responses:
+        200:
+          description: API is operational
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Hello from MongoDB"
+
+definitions:
+  Anime:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "anime456"
+      title:
+        type: string
+        example: "Naruto"
+      description:
+        type: string
+        example: "A young ninja strives to become the leader of his village."
+      anime_type:
+        type: string
+        example: "TV"
+      genres:
+        type: array
+        items:
           type: string
-        animeId:
-          type: string
-        imgUrl:
-          type: string
-        synopsis:
-          type: string
-        genres:
-          type: array
-          items:
-            type: string
+          example: "Action"

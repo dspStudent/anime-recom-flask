@@ -14,3 +14,5 @@ accelerate
 langchain-huggingface
 ipykernel
 flasgger
+python-dotenv
+flask-cors
